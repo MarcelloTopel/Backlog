@@ -3,9 +3,9 @@ import styled from '@emotion/styled';
 
 const TaskList = styled.div`
   min-height: 100px;
-  display: flex;
+  display: fix;
   flex-direction: column;
-  background: #f3f3f3;
+  background: gray;
   min-width: 341px;
   border-radius: 5px;
   padding: 15px 15px;

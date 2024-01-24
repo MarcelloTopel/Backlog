@@ -21,7 +21,7 @@ const TaskInformation = styled.div`
     width: 100%;
     font-size: 12px;
     font-weight: 400px;
-    color: #7d7d7d;
+    color: red;
   }
 `;
 

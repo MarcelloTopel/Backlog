@@ -1,4 +1,3 @@
-// Kanban.js
 import React, { useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import Container from './components/Container';
@@ -9,6 +8,20 @@ import TaskCard from './TaskCard';
 import AddTaskButton from './components/AddTaskButton';
 import { columnsFromBackend } from './KanbanData';
 
+const Backlog = ({ backlogColumn }) => (
+  <Droppable key={backlogColumn.id} droppableId={backlogColumn.id}>
+    {(provided, snapshot) => (
+      <TaskList ref={provided.innerRef} {...provided.droppableProps}>
+        <Title>{backlogColumn.title}</Title>
+        {backlogColumn.items.map((item, index) => (
+          <TaskCard key={item.id} item={item} index={index} />
+        ))}
+        {provided.placeholder}
+      </TaskList>
+    )}
+  </Droppable>
+);
+
 const Kanban = () => {
   const [columns, setColumns] = useState(columnsFromBackend);
 
@@ -16,10 +29,9 @@ const Kanban = () => {
     if (!result.destination) return;
     const { source, destination } = result;
 
-    if (
-      (source.droppableId === 'backlog' && destination.droppableId !== 'backlog') ||
-      (source.droppableId !== 'backlog' && destination.droppableId === 'backlog')
-    ) {
+    const isBacklogColumn = source.droppableId === 'backlog' || destination.droppableId === 'backlog';
+
+    if (isBacklogColumn) {
       return;
     }
 
@@ -81,25 +93,31 @@ const Kanban = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Container>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
           <AddTaskButton onAddTask={() => addTask('inProgress')} />
           <AddTaskButton onAddTask={() => addTask('todo')} />
           <AddTaskButton onAddTask={() => addTask('done')} />
         </div>
         <TaskColumnStyles>
-          {Object.entries(columns).map(([columnId, column], index) => (
-            <Droppable key={columnId} droppableId={columnId}>
-              {(provided, snapshot) => (
-                <TaskList ref={provided.innerRef} {...provided.droppableProps}>
-                  <Title>{column.title}</Title>
-                  {column.items.map((item, index) => (
-                    <TaskCard key={item.id} item={item} index={index} />
-                  ))}
-                  {provided.placeholder}
-                </TaskList>
-              )}
-            </Droppable>
-          ))}
+          {Object.entries(columns).map(([columnId, column], index) => {
+            if (columnId === 'backlog') {
+              // Use the Backlog component here
+              return <Backlog key={columnId} backlogColumn={column} />;
+            }
+            return (
+              <Droppable key={columnId} droppableId={columnId}>
+                {(provided, snapshot) => (
+                  <TaskList ref={provided.innerRef} {...provided.droppableProps}>
+                    <Title>{column.title}</Title>
+                    {column.items.map((item, index) => (
+                      <TaskCard key={item.id} item={item} index={index} />
+                    ))}
+                    {provided.placeholder}
+                  </TaskList>
+                )}
+              </Droppable>
+            );
+          })}
         </TaskColumnStyles>
       </Container>
     </DragDropContext>
